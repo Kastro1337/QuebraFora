@@ -11,9 +11,6 @@ const D_color = '#0095dd';
 // nothing to see here
 
 
-
-
-
 // score, lifes and etc
 let score = 0;
 var lives = 3;
@@ -25,12 +22,12 @@ var win = false;
 //maybe more parameters should be add
 class Ball{
   constructor(diameter){
-    //this.diameter = diameter;
+
     this.size = diameter; // its width e height
     this.x = WIDTH/2;
     this.y = HEIGHT/2;
     this.dx = 4; // dx and dy are ball directions
-    this.dy = 4; // on X and Y (boviously)
+    this.dy = 5; // on X and Y (boviously)
   }
   // guess what move function does
   move(){
@@ -48,6 +45,13 @@ class Ball{
     if(this.y - this.size < 0){
       this.dy *= -1
     }
+    if(this.y + this.size > HEIGHT){
+      // reset the game
+      // or break game
+      breakGame(); //TODO: classe Game.break();
+      this.x = WIDTH/2
+      this.y = HEIGHT/2
+    }
   }
 
   // check collision with paddle and bouces back
@@ -56,7 +60,7 @@ class Ball{
     if(this.x - this.size > other.x && // check the left side
        this.x + this.size < other.x + other.width && // check the right side
      this.y + this.size > other.y){ // check if height on screen is "compatible"
-       this.dy *= -1 // reverse
+       this.dy *= -1; // reverse
      }
   }
 
@@ -143,7 +147,7 @@ const brickInfo = {
   padding: 10,
   offsetX: 45, // values to deslocamento (displacemnet??)
   offsetY: 60, // horizontal n vertical
-  exists: true
+  exist: true
 };
 //acctually generate the bricks
 function generateBricks(rowSize, columnSize){ // TODO: makes rowSize and columnSize upon canva's width and height
@@ -162,8 +166,28 @@ function generateBricks(rowSize, columnSize){ // TODO: makes rowSize and columnS
   }
   return array
 }
+//Bricks collision
+function bricksCollision(array, ball){
+  array.forEach(column => {
+    column.forEach(brick => {
+      if(brick.exist){
+        if(
+          ball.x - ball.size > brick.x &&                // check the left side
+          ball.x + ball.size < brick.x + brick.width &&  // check the right side
+          ball.y + ball.size > brick.y &&                // check the top side
+          ball.y - ball.size < brick.y + brick.height    // check the bottom side
+        ){ // then
+          brick.exist = false // remove from EXISTENCE º-º
+          ball.dy *= -1       // reverse vertically (remember that)
+          score +=1
+        }
+      }
+    });
+  });
+}
 
-//draw the bricks, but need an array as argument ↑↑↑
+
+//draw the bricks, but need an array as argument
 // slightly different than ball.draw and pad.draw
 // 'cause does it multiple times
 function drawBricks(array){
@@ -171,8 +195,7 @@ function drawBricks(array){
     column.forEach(brick => {   // method instead of for(i=0;i<z;i++){}
       ctx.beginPath();
       ctx.rect(brick.x, brick.y, brick.width, brick.height);
-      ctx.fillStyle = brick.exists ? D_color : "transparent"; // abracadabra, make the bricks dissapear
-      ctx.fillStyle = D_color;
+      ctx.fillStyle = brick.exist ? D_color : "transparent" ; // abracadabra, make the bricks dissapeara
       ctx.fill();
       ctx.closePath();
     });
@@ -182,8 +205,8 @@ function drawBricks(array){
 // draw the text, like score and lifes
 // call it a primitive HUD
 function drawText(){
-  ctx.font = '20px Arial';
-  ctx.fillText(`Score: ${score}`, canvas.width - 100, 30);
+  ctx.font = `${HEIGHT/40}px Arial`;
+  ctx.fillText(`Score: ${score}`, WIDTH - 150,  HEIGHT/15);
 
 }
 
@@ -220,11 +243,22 @@ function update(){
   myball.wallDetect();
   myball.paddleDetect(mypaddle);
 
+  //bricks
+  bricksCollision(bricksArray, myball);
+
   //drawings
   drawScreen();
   requestAnimationFrame(update);
 }
 
+function breakGame(){
+  score = 0;
+  bricksArray.forEach(column => {
+    column.forEach(brick => {
+      brick.exist = true;
+    });
+  });
+}
 
 
 //game running ↓
