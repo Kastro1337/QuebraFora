@@ -1,0 +1,16 @@
+#
+# list of bugs found in the game
+#
+
+1. The score disappear when the right-bottom brick is height
+  Cause:  Unknown
+  Fix:    Unknown
+
+2. Ball go into two bricks and break many bricks in the same movement
+  Cause:  the ball Dy is allways inverted on hit, causing the ball to bounce weird
+  Fix:  when the ball hit the top/bottom of the brick, invert Dy. when the ball hit the
+        Left/right of the brick invert the Dx
+
+3. When keyUping, the paddle will stop for miliseconds, player wont be able to change direction quickly
+  Cause: makes the paddle.dx = 0
+  fix: maybe change the way the paddle movement works
